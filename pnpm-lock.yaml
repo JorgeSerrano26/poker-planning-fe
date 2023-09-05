@@ -50,6 +50,9 @@ dependencies:
   socket.io-client:
     specifier: ^4.7.2
     version: 4.7.2
+  sonner:
+    specifier: ^0.7.0
+    version: 0.7.0(react-dom@18.2.0)(react@18.2.0)
   tailwindcss:
     specifier: 3.3.3
     version: 3.3.3
@@ -3264,6 +3267,16 @@ packages:
       debug: 4.3.4
     transitivePeerDependencies:
       - supports-color
+    dev: false
+
+  /sonner@0.7.0(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-vAlXCrE6/183yt64ktIUnPv85RmAPYiicl5z35fDDFhWRIUpg7N62TsiIbHjwGuxbVJu/5hYlh92HHImsS27dA==}
+    peerDependencies:
+      react: ^18.0.0
+      react-dom: ^18.0.0
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
     dev: false
 
   /source-map-js@1.0.2:

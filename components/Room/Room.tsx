@@ -4,7 +4,7 @@ import useRoom, { User } from "@/hooks/useRoom";
 import { CardProps } from "../Card/Card";
 import { useState } from "react";
 import CardsContainer from "../CardsContainer/CardsContainer";
-import { Button } from "@nextui-org/react";
+import { Button, Spinner } from "@nextui-org/react";
 import { Avatar } from "@nextui-org/react";
 
 type Props = {
@@ -13,11 +13,19 @@ type Props = {
 };
 
 const RoomComponent = ({ roomId, user }: Props) => {
-	const { users, cards, votes, showVotes, vote, revealVotes, resetVotes } =
-		useRoom({
-			roomId: roomId,
-			user,
-		});
+	const {
+		users,
+		cards,
+		votes,
+		showVotes,
+		vote,
+		revealVotes,
+		resetVotes,
+		connected,
+	} = useRoom({
+		roomId: roomId,
+		user,
+	});
 
 	const [selectedCard, setSelectedCard] = useState<number | null>(null);
 	const [selectedValue, setSelectedValue] = useState<number | null>(null);
@@ -34,6 +42,13 @@ const RoomComponent = ({ roomId, user }: Props) => {
 		setSelectedValue(null);
 	};
 
+	if (!connected) {
+		return (
+			<div className="w-full h-full flex justify-center align-middle">
+				<Spinner />
+			</div>
+		);
+	}
 	return (
 		<div>
 			<Button color="primary">Cerrar sesion</Button>

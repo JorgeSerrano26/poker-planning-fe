@@ -16,7 +16,7 @@ const Room = async ({ params }: NextPage) => {
 	const { user } = session;
 
 	if (!params.roomId) {
-		redirect("/");
+		redirect("/?error=invalidroom");
 	}
 
 	const finalUser: User = {

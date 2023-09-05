@@ -39,6 +39,7 @@ const useRoom = ({ roomId, user }: UseRoomParams) => {
 	const [users, setUsers] = useState<User[]>([]);
 	const [cards, setCards] = useState<Card[]>([]);
 	const [votes, setVotes] = useState<Vote[]>([]);
+	const [connected, setConnected] = useState(false);
 
 	useEffect(() => {
 		try {
@@ -51,9 +52,10 @@ const useRoom = ({ roomId, user }: UseRoomParams) => {
 				setVotes(votes);
 				setUsers(users);
 				setCards(cards);
+				setConnected(true);
 			});
 			socket.current.on("room_not_found", () => {
-				router.replace("/");
+				router.replace("/?error=room_not_found");
 			});
 			// Users
 			socket.current.on("user_joined", (user: User) => {
@@ -131,6 +133,7 @@ const useRoom = ({ roomId, user }: UseRoomParams) => {
 		user,
 		revealVotes,
 		resetVotes,
+		connected,
 	};
 };
 
