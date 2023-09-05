@@ -11,6 +11,7 @@ type UseRoomParams = {
 export type User = {
 	userName: string;
 	id: string;
+	image: string;
 };
 
 type Vote = {

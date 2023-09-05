@@ -22,6 +22,7 @@ const Room = async ({ params }: NextPage) => {
 	const finalUser: User = {
 		userName: user?.name ?? "",
 		id: user?.email ?? "",
+		image: user?.image ?? "",
 	};
 
 	return <RoomComponent user={finalUser} roomId={params.roomId} />;
