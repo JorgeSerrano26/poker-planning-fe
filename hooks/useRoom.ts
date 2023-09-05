@@ -8,7 +8,7 @@ type UseRoomParams = {
 	user: User;
 };
 
-type User = {
+export type User = {
 	userName: string;
 	id: string;
 };

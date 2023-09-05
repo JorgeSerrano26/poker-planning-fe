@@ -1,16 +1,13 @@
 "use client";
 
-import useRoom from "@/hooks/useRoom";
+import useRoom, { User } from "@/hooks/useRoom";
 import { CardProps } from "../Card/Card";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import CardsContainer from "../CardsContainer/CardsContainer";
-import { v4 as uuid } from "uuid";
+import Link from "next/link";
 
 type Props = {
-	user: {
-		userName: string;
-		id: string;
-	};
+	user: User;
 	roomId: string;
 };
 
@@ -46,6 +43,9 @@ const RoomComponent = ({ roomId, user }: Props) => {
 
 	return (
 		<div>
+			<li>
+				<Link href="/api/auth/signout">Sign Out</Link>
+			</li>
 			<h1>Room {roomId}</h1>
 			<div>
 				<p>Selected card: {selectedCard}</p>
