@@ -14,7 +14,7 @@ export type User = {
 	image: string;
 };
 
-type Vote = {
+export type Vote = {
 	voteId: string;
 	cardId: number;
 	userId: User["id"];
@@ -29,7 +29,7 @@ type JoinedData = {
 
 const onConnect = () => console.log("Connected successfully");
 
-type Card = Pick<CardProps, "value" | "label" | "id">;
+export type Card = Pick<CardProps, "value" | "label" | "id">;
 
 const useRoom = ({ roomId, user }: UseRoomParams) => {
 	const socket = useRef<Socket | null>(null);

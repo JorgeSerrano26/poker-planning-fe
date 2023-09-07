@@ -10,7 +10,7 @@ const Room = async ({ params }: NextPage) => {
 	const session = await getServerSession(options);
 
 	if (!session) {
-		redirect(`/api/auth/signin?callbackUrl=/room/${params.roomId}`);
+		redirect(`/login?callbackUrl=/room/${params.roomId}`);
 	}
 
 	const { user } = session;

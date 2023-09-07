@@ -6,6 +6,8 @@ import { useState } from "react";
 import CardsContainer from "../CardsContainer/CardsContainer";
 import { Button, Spinner } from "@nextui-org/react";
 import { Avatar } from "@nextui-org/react";
+import { signOut } from "next-auth/react";
+import ListOfUsers from "@/components/ListOfUsers/ListOfUsers";
 
 type Props = {
 	user: User;
@@ -51,7 +53,9 @@ const RoomComponent = ({ roomId, user }: Props) => {
 	}
 	return (
 		<div>
-			<Button color="primary">Cerrar sesion</Button>
+			<Button color="primary" onClick={() => signOut()}>
+				Cerrar sesion
+			</Button>
 			<h1>
 				Room {roomId} - {user.userName}
 			</h1>
@@ -60,13 +64,9 @@ const RoomComponent = ({ roomId, user }: Props) => {
 				<p>Selected value: {selectedValue}</p>
 			</div>
 
-			<button
-				type="submit"
-				onClick={showVotes ? onResetVotes : revealVotes}
-				className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-			>
+			<Button color="primary" onClick={showVotes ? onResetVotes : revealVotes}>
 				{showVotes ? "Reset votes" : "Reveal votes"}
-			</button>
+			</Button>
 
 			<CardsContainer
 				cards={cards.map((card) => ({
@@ -84,28 +84,13 @@ const RoomComponent = ({ roomId, user }: Props) => {
 					);
 				})}
 			</div>
-			<div className="w-72 h-72 bg-blue-600 bg-opacity-20 backdrop-blur-lg rounded-lg drop-shadow-lg p-3">
-				<ul className="flex flex-col">
-					{users.map((user) => {
-						const vote = votes?.find((el) => el.userId === user.id);
-						console.log(vote);
-						const card = cards.find((card) => card.id === vote?.cardId);
-
-						const label = !vote
-							? "Aun no voto"
-							: showVotes
-							? card?.label
-							: "Voto oculto";
-
-						return (
-							<li key={`vote-${user.id}`} className="flex items-center">
-								<Avatar src={user.image} className="mr-2" />
-								<span className="truncate max-w-[100px]:">{user.userName}</span>{" "}
-								- {label}
-							</li>
-						);
-					})}
-				</ul>
+			<div>
+				<ListOfUsers
+					users={users}
+					votes={votes}
+					cards={cards}
+					showVotes={showVotes}
+				/>
 			</div>
 		</div>
 	);
