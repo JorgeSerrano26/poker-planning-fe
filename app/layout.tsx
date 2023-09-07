@@ -1,5 +1,3 @@
-"use client";
-
 import type { Metadata } from "next";
 
 import "./globals.css";
@@ -16,7 +14,9 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang="en">
-			<body>{children}</body>
+			<body>
+				<main>{children}</main>
+			</body>
 		</html>
 	);
 }

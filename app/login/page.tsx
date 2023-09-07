@@ -1,8 +1,8 @@
-"use client";
-
 import GlitchText from "@/components/GlitchText/GlitchText";
-import GoogleButton from "@/components/GoogleButton/GoogleButton";
-import { signIn } from "next-auth/react";
+import LoginForm from "./components/LoginForm/LoginForm";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { options } from "../api/auth/[...nextauth]/options";
 
 type Props = {
 	searchParams?: {
@@ -10,18 +10,20 @@ type Props = {
 	};
 };
 
-const Login = ({ searchParams }: Props) => {
-	const handleOnClick = () => {
-		signIn("google", { callbackUrl: searchParams?.callbackUrl ?? "/" });
-	};
+const Login = async ({ searchParams }: Props) => {
+	const session = await getServerSession(options);
+
+	if (session) {
+		redirect("/");
+	}
 
 	return (
-		<main className="flex flex-col items-center justify-center w-full h-full p-5">
+		<section className="flex flex-col items-center justify-center w-full h-screen p-5">
 			<h5 className="mb-3 text-base font-semibold text-gray-900 md:text-xl">
 				<GlitchText text="Poker Planning" className="mb-5" />
 			</h5>
-			<GoogleButton onClick={handleOnClick} />
-		</main>
+			<LoginForm callbackUrl={searchParams?.callbackUrl} />
+		</section>
 	);
 };
 

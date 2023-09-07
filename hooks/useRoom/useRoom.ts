@@ -1,35 +1,18 @@
-import { CardProps } from "@/components/Card/Card";
+import {
+	leaveRoomEvent,
+	resetVotesEvent,
+	revealVotesEvent,
+	voteEvent,
+} from "./events";
 import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { useRouter } from "next/navigation";
-
-type UseRoomParams = {
-	roomId: string;
-	user: User;
-};
-
-export type User = {
-	userName: string;
-	id: string;
-	image: string;
-};
-
-export type Vote = {
-	voteId: string;
-	cardId: number;
-	userId: User["id"];
-};
-
-type JoinedData = {
-	users: User[];
-	cards: Card[];
-	votes: Vote[];
-	showCards: boolean;
-};
+import type { UseRoomParams, User, Vote, JoinedData, Card } from "./types";
+import { Errors } from "@/utils/Errors";
 
 const onConnect = () => console.log("Connected successfully");
 
-export type Card = Pick<CardProps, "value" | "label" | "id">;
+const SOCKET_URL = process.env.NEXT_PUBLIC_BE_URL ?? "";
 
 const useRoom = ({ roomId, user }: UseRoomParams) => {
 	const socket = useRef<Socket | null>(null);
@@ -40,10 +23,11 @@ const useRoom = ({ roomId, user }: UseRoomParams) => {
 	const [cards, setCards] = useState<Card[]>([]);
 	const [votes, setVotes] = useState<Vote[]>([]);
 	const [connected, setConnected] = useState(false);
+	const [error, setError] = useState(null);
 
 	useEffect(() => {
 		try {
-			socket.current = io("http://localhost:4000");
+			socket.current = io(SOCKET_URL);
 			socket.current.on("connect", onConnect);
 			socket.current.emit("join_room", { user, roomId });
 			socket.current.on("joined", (data: JoinedData) => {
@@ -55,7 +39,7 @@ const useRoom = ({ roomId, user }: UseRoomParams) => {
 				setConnected(true);
 			});
 			socket.current.on("room_not_found", () => {
-				router.replace("/?error=room_not_found");
+				router.replace(`/?error=${Errors.ROOM_NOT_FOUND}`);
 			});
 			// Users
 			socket.current.on("user_joined", (user: User) => {
@@ -105,7 +89,9 @@ const useRoom = ({ roomId, user }: UseRoomParams) => {
 		}
 
 		return () => {
-			socket.current?.emit("leave_room", { roomId, user });
+			// Reset socket on unmount
+			const { event, data } = leaveRoomEvent({ roomId, user });
+			socket.current?.emit(event, data);
 			window.removeEventListener("beforeunload", () => {});
 			socket.current?.disconnect();
 			socket.current = null;
@@ -113,15 +99,18 @@ const useRoom = ({ roomId, user }: UseRoomParams) => {
 	}, []);
 
 	const vote = (cardId: number) => {
-		socket.current?.emit("vote", { roomId, cardId, user });
+		const { event, data } = voteEvent({ roomId, cardId, user });
+		socket.current?.emit(event, data);
 	};
 
 	const revealVotes = () => {
-		socket.current?.emit("reveal_votes", { roomId });
+		const { event, data } = revealVotesEvent({ roomId });
+		socket.current?.emit(event, data);
 	};
 
 	const resetVotes = () => {
-		socket.current?.emit("reset_votes", { roomId });
+		const { event, data } = resetVotesEvent({ roomId });
+		socket.current?.emit(event, data);
 	};
 
 	return {

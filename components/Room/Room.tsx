@@ -1,11 +1,11 @@
 "use client";
 
-import useRoom, { User } from "@/hooks/useRoom";
+import useRoom from "@/hooks/useRoom/useRoom";
+import type { User } from "@/hooks/useRoom/types";
 import { CardProps } from "../Card/Card";
 import { useState } from "react";
 import CardsContainer from "../CardsContainer/CardsContainer";
 import { Button, Spinner } from "@nextui-org/react";
-import { Avatar } from "@nextui-org/react";
 import { signOut } from "next-auth/react";
 import ListOfUsers from "@/components/ListOfUsers/ListOfUsers";
 
@@ -53,9 +53,6 @@ const RoomComponent = ({ roomId, user }: Props) => {
 	}
 	return (
 		<div>
-			<Button color="primary" onClick={() => signOut()}>
-				Cerrar sesion
-			</Button>
 			<h1>
 				Room {roomId} - {user.userName}
 			</h1>

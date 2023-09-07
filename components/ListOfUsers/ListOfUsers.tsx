@@ -1,4 +1,4 @@
-import type { User, Vote, Card } from "@/hooks/useRoom";
+import type { User, Vote, Card } from "@/hooks/useRoom/types";
 import { Avatar } from "@nextui-org/react";
 
 type Props = {
