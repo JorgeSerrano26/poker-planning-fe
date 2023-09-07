@@ -4,8 +4,11 @@ import GlitchText from "@/components/GlitchText/GlitchText";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Socket, io } from "socket.io-client";
-import { Input } from "@nextui-org/react";
+import { Button, Divider, Input, Link } from "@nextui-org/react";
 import { Toaster, toast } from "sonner";
+import useRoom from "@/hooks/useRoom/useRoom";
+import useCreateRoom from "@/hooks/useCreateRoom/useCreateRoom";
+import API from "@/app/services/API";
 
 type Props = {
 	error?: "room_not_found";
@@ -13,36 +16,28 @@ type Props = {
 
 export default function CrearRoomOrJoin({ error }: Props) {
 	const router = useRouter();
-	const socket = useRef<Socket | null>(null);
-	const [roomId, setRoomId] = useState("");
-
-	useEffect(() => {
-		socket.current = io(process.env.NEXT_PUBLIC_BE_URL ?? "", {
-			reconnection: true,
-			reconnectionDelay: 3000, // 3 segundos
-			reconnectionDelayMax: 5000,
-			reconnectionAttempts: 5,
-		});
-		socket.current.on("connect_error", () => {
-			toast.error("Connection error, try later.");
-		});
-		socket.current.on("connect", onConnect);
-		socket.current.on("room_created", (data: { roomId: string }) => {
-			router.replace(`/room/${data.roomId}`);
-		});
-	}, []);
-
-	const onConnect = () => {
-		console.log("Connected successfully");
-		toast.success("Connected successfully");
-	};
-
-	const creteRoom = () => {
-		socket.current?.emit("create_room");
-	};
+	const [roomId, setRoomId] = useState<string>("");
+	const { creteRoom, connected } = useCreateRoom({
+		onRoomCreated: (roomId) => {
+			router.replace(`/room/${roomId}`);
+		},
+		onConntectError: (message) => {
+			toast.error(message);
+		},
+	});
 
 	const handleRoomId: React.ChangeEventHandler<HTMLInputElement> = (e) =>
 		setRoomId(e.target.value);
+
+	const redirectToRoom = async () => {
+		try {
+			await API.getRoom(roomId);
+			router.replace(`/room/${roomId}`);
+		} catch (error) {
+			if ((error as Error).message === "404")
+				toast.error("The room doesn't exist");
+		}
+	};
 
 	useEffect(() => {
 		if (error === "room_not_found") {
@@ -63,23 +58,20 @@ export default function CrearRoomOrJoin({ error }: Props) {
 						onChange={handleRoomId}
 						className="mb-3"
 					/>
-					<a
+					<Button
 						href={roomId.length ? `/room/${roomId}` : "#"}
-						className={`${
-							roomId.length ? "disabled" : ""
-						} text-white text-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800`}
+						color="primary"
+						onClick={redirectToRoom}
+						className={!roomId.length ? "opacity-50" : ""}
+						disabled={!roomId.length}
+						variant="solid"
 					>
 						Unirse a la sala
-					</a>
-					<span className="h-1 w-full bg-blue-700 mt-5 mb-5 rounded" />
-					<button
-						type="button"
-						onClick={creteRoom}
-						disabled={!socket}
-						className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-					>
+					</Button>
+					<Divider className="my-4 bg-blue-700" />
+					<Button color="primary" onClick={creteRoom} disabled={!connected}>
 						Crear sala
-					</button>
+					</Button>
 				</div>
 			</section>
 			<Toaster position="top-right" richColors />

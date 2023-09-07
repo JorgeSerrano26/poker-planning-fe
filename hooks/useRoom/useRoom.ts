@@ -9,10 +9,7 @@ import { io, Socket } from "socket.io-client";
 import { useRouter } from "next/navigation";
 import type { UseRoomParams, User, Vote, JoinedData, Card } from "./types";
 import { Errors } from "@/utils/Errors";
-
-const onConnect = () => console.log("Connected successfully");
-
-const SOCKET_URL = process.env.NEXT_PUBLIC_BE_URL ?? "";
+import { SOCKET_CONFIGS } from "./constants";
 
 const useRoom = ({ roomId, user }: UseRoomParams) => {
 	const socket = useRef<Socket | null>(null);
@@ -27,8 +24,8 @@ const useRoom = ({ roomId, user }: UseRoomParams) => {
 
 	useEffect(() => {
 		try {
-			socket.current = io(SOCKET_URL);
-			socket.current.on("connect", onConnect);
+			socket.current = io(SOCKET_CONFIGS.url, SOCKET_CONFIGS.options);
+			socket.current.on("connect", () => console.log("Connected successfully"));
 			socket.current.emit("join_room", { user, roomId });
 			socket.current.on("joined", (data: JoinedData) => {
 				const { users, cards, votes, showCards } = data;
@@ -79,6 +76,10 @@ const useRoom = ({ roomId, user }: UseRoomParams) => {
 					}
 				});
 			});
+			socket.current.on("connect_error", () => {});
+			socket.current.on("room_created", (data: { roomId: string }) => {
+				router.replace(`/room/${data.roomId}`);
+			});
 			window.addEventListener("beforeunload", () => {
 				socket.current?.emit("leave_room", { roomId, user });
 				socket.current?.disconnect();
@@ -111,6 +112,10 @@ const useRoom = ({ roomId, user }: UseRoomParams) => {
 	const resetVotes = () => {
 		const { event, data } = resetVotesEvent({ roomId });
 		socket.current?.emit(event, data);
+	};
+
+	const createRoom = () => {
+		socket.current?.emit("create_room");
 	};
 
 	return {

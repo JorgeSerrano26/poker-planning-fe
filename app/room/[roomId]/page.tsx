@@ -4,16 +4,15 @@ import { getServerSession } from "next-auth/next";
 import { options } from "@/app/api/auth/[...nextauth]/options";
 import { User } from "@/hooks/useRoom/types";
 import { Errors } from "@/utils/Errors";
+import API from "@/app/services/API";
 
 type NextPage = { params: { roomId: string } };
 
 const getRoom = async (roomId: string) => {
 	try {
-		const res = await fetch(
-			`${process.env.NEXT_PUBLIC_BE_URL}/api/room/${roomId}`,
-		);
+		const data = await API.getRoom(roomId);
 		return {
-			data: await res.json(),
+			data,
 			error: null,
 		};
 	} catch (error) {

@@ -3,6 +3,8 @@ import { CardProps } from "@/components/Card/Card";
 export type UseRoomParams = {
 	roomId: string;
 	user: User;
+	onConnect?: () => void;
+	onConnectError?: (error: string) => void;
 };
 
 export type User = {
