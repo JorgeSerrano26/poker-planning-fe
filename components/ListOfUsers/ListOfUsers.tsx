@@ -2,6 +2,7 @@ import type { User, Vote, Card } from "@/hooks/useRoom/types";
 import { Avatar } from "@nextui-org/react";
 
 type Props = {
+	currentUser: User;
 	users: User[];
 	votes: Vote[];
 	cards: Card[];
@@ -11,6 +12,7 @@ type Props = {
 
 const ListOfUsers = ({
 	users,
+	currentUser,
 	votes,
 	cards,
 	showVotes = false,
@@ -22,7 +24,7 @@ const ListOfUsers = ({
 				<h5 className="text-xl font-bold leading-none text-white flex-shrink-0">
 					Votes average
 				</h5>
-				<p>{showVotes ? votesAverage : "Votes hidden"}</p>
+				<p>{showVotes ? votesAverage ?? "No hubo votos" : "Votes hidden"}</p>
 			</div>
 			<div className="flow-root">
 				<ul
@@ -44,9 +46,12 @@ const ListOfUsers = ({
 								<div className="flex items-center space-x-4">
 									<div className="flex-shrink-0">
 										<Avatar
+											isBordered={user.id === currentUser.id}
+											color="secondary"
 											src={user.image}
 											className="mr-2"
 											alt={user.userName}
+											showFallback
 										/>
 									</div>
 									<div className="flex-1 min-w-0">

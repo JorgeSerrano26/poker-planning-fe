@@ -3,10 +3,10 @@
 import useRoom from "@/hooks/useRoom/useRoom";
 import type { User } from "@/hooks/useRoom/types";
 import { CardProps } from "../Card/Card";
-import { useState } from "react";
 import CardsContainer from "../CardsContainer/CardsContainer";
 import { Button, Spinner } from "@nextui-org/react";
 import ListOfUsers from "@/components/ListOfUsers/ListOfUsers";
+import { Toaster, toast } from "sonner";
 
 type Props = {
 	user: User;
@@ -24,24 +24,19 @@ const RoomComponent = ({ roomId, user }: Props) => {
 		resetVotes,
 		connected,
 		votesAverage,
+		selectedCard,
 	} = useRoom({
 		roomId: roomId,
 		user,
 	});
 
-	const [selectedCard, setSelectedCard] = useState<number | null>(null);
-	const [selectedValue, setSelectedValue] = useState<number | null>(null);
-
-	const onClick = (id: CardProps["id"], value: CardProps["value"]) => {
-		setSelectedCard(id);
-		setSelectedValue(value);
+	const onClick = (id: CardProps["id"]) => {
 		vote(id);
+		toast.success("Voted");
 	};
 
 	const onResetVotes = () => {
 		resetVotes();
-		setSelectedCard(null);
-		setSelectedValue(null);
 	};
 
 	if (!connected) {
@@ -52,45 +47,45 @@ const RoomComponent = ({ roomId, user }: Props) => {
 		);
 	}
 	return (
-		<div className="w-full mx-auto">
-			<h1>
-				Room {roomId} - {user.userName}
-			</h1>
-			<div>
-				<p>Selected card: {selectedCard}</p>
-				<p>Selected value: {selectedValue}</p>
-			</div>
+		<>
+			<div className="w-full mx-auto">
+				<div className="container m-auto py-5">
+					<h1 className="font-bold">
+						Room {roomId} - Usuario {user.userName}
+					</h1>
+				</div>
+				<section className="container m-auto py-5">
+					<Button
+						color="primary"
+						onClick={showVotes ? onResetVotes : revealVotes}
+					>
+						{showVotes ? "Reset votes" : "Reveal votes"}
+					</Button>
+				</section>
 
-			<Button color="primary" onClick={showVotes ? onResetVotes : revealVotes}>
-				{showVotes ? "Reset votes" : "Reveal votes"}
-			</Button>
-
-			<CardsContainer
-				cards={cards.map((card) => ({
-					...card,
-					onClick,
-					selected: selectedCard === card.id,
-				}))}
-			/>
-			<div>
-				{votes?.map((vote) => {
-					return (
-						<p key={vote.voteId}>
-							{vote.userId} {vote.cardId}
-						</p>
-					);
-				})}
+				<section className="container m-auto py-5">
+					<CardsContainer
+						showVotes={showVotes}
+						cards={cards.map((card) => ({
+							...card,
+							onClick,
+							selected: selectedCard === card.id,
+						}))}
+					/>
+				</section>
+				<section className="container m-auto py-5">
+					<ListOfUsers
+						currentUser={user}
+						users={users}
+						votes={votes}
+						cards={cards}
+						showVotes={showVotes}
+						votesAverage={votesAverage}
+					/>
+				</section>
 			</div>
-			<div>
-				<ListOfUsers
-					users={users}
-					votes={votes}
-					cards={cards}
-					showVotes={showVotes}
-					votesAverage={votesAverage}
-				/>
-			</div>
-		</div>
+			<Toaster position="top-right" richColors />
+		</>
 	);
 };
 

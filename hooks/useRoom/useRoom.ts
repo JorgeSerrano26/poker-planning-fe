@@ -14,7 +14,8 @@ import { SOCKET_CONFIGS } from "./constants";
 const useRoom = ({ roomId, user }: UseRoomParams) => {
 	const socket = useRef<Socket | null>(null);
 	const router = useRouter();
-	// States
+	const [selectedCard, setSelectedCard] = useState<number | null>(null);
+	// States - Unificar?
 	const [showVotes, setShowVotes] = useState(false);
 	const [users, setUsers] = useState<User[]>([]);
 	const [cards, setCards] = useState<Card[]>([]);
@@ -65,12 +66,11 @@ const useRoom = ({ roomId, user }: UseRoomParams) => {
 				setShowVotes(false);
 				setVotes([]);
 				setVotesAverage(0);
+				setSelectedCard(null);
 			});
 			socket.current.on("user_voted", (vote: Vote) => {
 				setVotes((currentVotes) => {
-					console.log("currentVotes", currentVotes);
 					const index = currentVotes.findIndex((v) => v.userId === vote.userId);
-					console.log("index", index);
 					if (index === -1) {
 						return [...currentVotes, vote];
 					} else {
@@ -106,6 +106,7 @@ const useRoom = ({ roomId, user }: UseRoomParams) => {
 
 	const vote = (cardId: number) => {
 		const { event, data } = voteEvent({ roomId, cardId, user });
+		setSelectedCard(cardId);
 		socket.current?.emit(event, data);
 	};
 
@@ -130,6 +131,7 @@ const useRoom = ({ roomId, user }: UseRoomParams) => {
 		resetVotes,
 		connected,
 		votesAverage,
+		selectedCard,
 	};
 };
 
