@@ -25,7 +25,12 @@ const LoginForm = ({ callbackUrl = "/" }: Props) => {
 			{availableProviders.map((provider) => {
 				const Component = ProvidersMap[provider];
 
-				return <Component onClick={handleOnClick(provider)} />;
+				return (
+					<Component
+						key={`provider-${provider}`}
+						onClick={handleOnClick(provider)}
+					/>
+				);
 			})}
 		</div>
 	);
