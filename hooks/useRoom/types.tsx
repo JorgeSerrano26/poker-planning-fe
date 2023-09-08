@@ -5,6 +5,7 @@ export type UseRoomParams = {
 	user: User;
 	onConnect?: () => void;
 	onConnectError?: (error: string) => void;
+	onUserLeave?: (name: string) => void;
 };
 
 export type User = {
@@ -19,7 +20,7 @@ export type Vote = {
 	userId: User["id"];
 };
 
-export type JoinedData = {
+export type Room = {
 	users: User[];
 	cards: Card[];
 	votes: Vote[];

@@ -5,6 +5,9 @@ import { options } from "@/app/api/auth/[...nextauth]/options";
 import { User } from "@/hooks/useRoom/types";
 import { Errors } from "@/utils/Errors";
 import API from "@/app/services/API";
+import { UserProvider } from "@/context/useUser";
+import Header from "@/components/Header/Header";
+import generateUser from "@/utils/generateUser";
 
 type NextPage = { params: { roomId: string } };
 
@@ -30,25 +33,20 @@ const Room = async ({ params }: NextPage) => {
 		redirect(`/login?callbackUrl=/room/${params.roomId}`);
 	}
 
-	const { user } = session;
-
-	if (!params.roomId) {
-		redirect("/?error=invalidroom");
-	}
-
 	const { error } = await getRoom(params.roomId);
 
 	if (error) {
 		redirect(`/?error=${Errors.ROOM_NOT_FOUND}`);
 	}
 
-	const finalUser: User = {
-		userName: user?.name ?? "",
-		id: user?.email ?? "",
-		image: user?.image ?? "",
-	};
+	const user = generateUser(session.user);
 
-	return <RoomComponent user={finalUser} roomId={params.roomId} />;
+	return (
+		<UserProvider user={user}>
+			<Header />
+			<RoomComponent user={user} roomId={params.roomId} />
+		</UserProvider>
+	);
 };
 
 export default Room;

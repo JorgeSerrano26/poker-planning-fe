@@ -7,21 +7,24 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { useRouter } from "next/navigation";
-import type { UseRoomParams, User, Vote, JoinedData, Card } from "./types";
+import type { UseRoomParams, User, Vote, Room, Card } from "./types";
 import { Errors } from "@/utils/Errors";
 import { SOCKET_CONFIGS } from "./constants";
 
-const useRoom = ({ roomId, user }: UseRoomParams) => {
+const useRoom = ({ roomId, user, onUserLeave }: UseRoomParams) => {
 	const socket = useRef<Socket | null>(null);
 	const router = useRouter();
 	const [selectedCard, setSelectedCard] = useState<number | null>(null);
-	// States - Unificar?
-	const [showVotes, setShowVotes] = useState(false);
-	const [users, setUsers] = useState<User[]>([]);
-	const [cards, setCards] = useState<Card[]>([]);
-	const [votes, setVotes] = useState<Vote[]>([]);
+	const [room, setRoom] = useState<Room>({
+		users: [],
+		cards: [],
+		votes: [],
+		showVotes: false,
+		votesAverage: 0,
+	});
+
 	const [connected, setConnected] = useState(false);
-	const [votesAverage, setVotesAverage] = useState(0);
+
 	// Errors
 	const [error, setError] = useState(null);
 
@@ -30,13 +33,8 @@ const useRoom = ({ roomId, user }: UseRoomParams) => {
 			socket.current = io(SOCKET_CONFIGS.url, SOCKET_CONFIGS.options);
 			socket.current.on("connect", () => console.log("Connected successfully"));
 			socket.current.emit("join_room", { user, roomId });
-			socket.current.on("joined", (data: JoinedData) => {
-				const { users, cards, votes, showVotes, votesAverage } = data;
-				setShowVotes(showVotes);
-				setVotesAverage(votesAverage);
-				setVotes(votes);
-				setUsers(users);
-				setCards(cards);
+			socket.current.on("joined", (data: Room) => {
+				setRoom(data);
 				setConnected(true);
 			});
 			socket.current.on("room_not_found", () => {
@@ -44,41 +42,51 @@ const useRoom = ({ roomId, user }: UseRoomParams) => {
 			});
 			// Users
 			socket.current.on("user_joined", (user: User) => {
-				setUsers((users) => [...users, user]);
+				setRoom((room) => ({
+					...room,
+					users: [...room.users, user],
+				}));
 			});
-			socket.current.on("user_left", ({ userId }: { userId: string }) => {
-				setUsers((users) => {
-					const index = users.findIndex((u) => u.id === userId);
+			socket.current.on("user_left", ({ id, userName }: User) => {
+				if (onUserLeave) onUserLeave(userName);
 
-					const newUsers = structuredClone(users);
-
-					newUsers.splice(index, 1);
-
-					return newUsers;
-				});
+				setRoom((room) => ({
+					...room,
+					users: room.users.filter((u) => u.id !== id),
+				}));
 			});
 			//Votes
 			socket.current.on("reveal_votes", ({ votesAverage }) => {
-				setShowVotes(true);
-				setVotesAverage(votesAverage);
+				setRoom((room) => ({
+					...room,
+					showVotes: true,
+					votesAverage,
+				}));
 			});
 			socket.current.on("reset_votes", () => {
-				setShowVotes(false);
-				setVotes([]);
-				setVotesAverage(0);
+				setRoom((room) => ({
+					...room,
+					showVotes: false,
+					votes: [],
+					votesAverage: 0,
+				}));
 				setSelectedCard(null);
 			});
 			socket.current.on("user_voted", (vote: Vote) => {
-				setVotes((currentVotes) => {
-					const index = currentVotes.findIndex((v) => v.userId === vote.userId);
-					if (index === -1) {
-						return [...currentVotes, vote];
-					} else {
-						const newVotes = structuredClone(currentVotes);
-						newVotes.splice(index, 1, vote);
+				setRoom((room) => {
+					const index = room.votes.findIndex((v) => v.userId === vote.userId);
 
-						return newVotes;
+					let newVotes = [...room.votes, vote];
+
+					if (index !== -1) {
+						newVotes = structuredClone(room.votes);
+						newVotes.splice(index, 1, vote);
 					}
+
+					return {
+						...room,
+						votes: newVotes,
+					};
 				});
 			});
 			socket.current.on("connect_error", () => {});
@@ -121,16 +129,15 @@ const useRoom = ({ roomId, user }: UseRoomParams) => {
 	};
 
 	return {
-		users,
-		votes,
-		cards,
+		users: room.users,
+		votes: room.votes,
+		cards: room.cards,
 		vote,
-		showVotes,
-		user,
+		showVotes: room.showVotes,
 		revealVotes,
 		resetVotes,
 		connected,
-		votesAverage,
+		votesAverage: room.votesAverage,
 		selectedCard,
 	};
 };
