@@ -6,7 +6,6 @@ import { CardProps } from "../Card/Card";
 import { useState } from "react";
 import CardsContainer from "../CardsContainer/CardsContainer";
 import { Button, Spinner } from "@nextui-org/react";
-import { signOut } from "next-auth/react";
 import ListOfUsers from "@/components/ListOfUsers/ListOfUsers";
 
 type Props = {
@@ -24,6 +23,7 @@ const RoomComponent = ({ roomId, user }: Props) => {
 		revealVotes,
 		resetVotes,
 		connected,
+		votesAverage,
 	} = useRoom({
 		roomId: roomId,
 		user,
@@ -52,7 +52,7 @@ const RoomComponent = ({ roomId, user }: Props) => {
 		);
 	}
 	return (
-		<div>
+		<div className="w-full mx-auto">
 			<h1>
 				Room {roomId} - {user.userName}
 			</h1>
@@ -87,6 +87,7 @@ const RoomComponent = ({ roomId, user }: Props) => {
 					votes={votes}
 					cards={cards}
 					showVotes={showVotes}
+					votesAverage={votesAverage}
 				/>
 			</div>
 		</div>

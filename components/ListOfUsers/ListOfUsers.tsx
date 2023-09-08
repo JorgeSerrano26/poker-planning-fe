@@ -6,15 +6,23 @@ type Props = {
 	votes: Vote[];
 	cards: Card[];
 	showVotes?: boolean;
+	votesAverage: number;
 };
 
-const ListOfUsers = ({ users, votes, cards, showVotes = false }: Props) => {
+const ListOfUsers = ({
+	users,
+	votes,
+	cards,
+	showVotes = false,
+	votesAverage,
+}: Props) => {
 	return (
 		<div className="w-full max-w-md p-4 bg-gray-900 border rounded-lg shadow sm:p-8">
 			<div className="flex items-center justify-between mb-4">
-				<h5 className="text-xl font-bold leading-none text-white">
-					Conntected users
+				<h5 className="text-xl font-bold leading-none text-white flex-shrink-0">
+					Votes average
 				</h5>
+				<p>{showVotes ? votesAverage : "Votes hidden"}</p>
 			</div>
 			<div className="flow-root">
 				<ul
@@ -26,10 +34,10 @@ const ListOfUsers = ({ users, votes, cards, showVotes = false }: Props) => {
 						const card = cards.find((card) => card.id === vote?.cardId);
 
 						const voteLabel = !vote
-							? "Aun no voto"
+							? "Hasn't voted yet"
 							: showVotes
 							? card?.label
-							: "Voto oculto";
+							: "Vote hidden";
 
 						return (
 							<li className="py-3 sm:py-4" key={`vote-${user.id}`}>
@@ -46,7 +54,11 @@ const ListOfUsers = ({ users, votes, cards, showVotes = false }: Props) => {
 											{user.userName}
 										</p>
 									</div>
-									<div className="inline-flex items-center text-base font-semibold text-gray-300">
+									<div
+										className={`inline-flex items-center text-base font-semibold ${
+											!vote ? "text-red-300" : "text-gray-300"
+										}`}
+									>
 										{voteLabel}
 									</div>
 								</div>

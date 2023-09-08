@@ -20,6 +20,8 @@ const useRoom = ({ roomId, user }: UseRoomParams) => {
 	const [cards, setCards] = useState<Card[]>([]);
 	const [votes, setVotes] = useState<Vote[]>([]);
 	const [connected, setConnected] = useState(false);
+	const [votesAverage, setVotesAverage] = useState(0);
+	// Errors
 	const [error, setError] = useState(null);
 
 	useEffect(() => {
@@ -28,8 +30,9 @@ const useRoom = ({ roomId, user }: UseRoomParams) => {
 			socket.current.on("connect", () => console.log("Connected successfully"));
 			socket.current.emit("join_room", { user, roomId });
 			socket.current.on("joined", (data: JoinedData) => {
-				const { users, cards, votes, showCards } = data;
-				setShowVotes(showCards);
+				const { users, cards, votes, showVotes, votesAverage } = data;
+				setShowVotes(showVotes);
+				setVotesAverage(votesAverage);
 				setVotes(votes);
 				setUsers(users);
 				setCards(cards);
@@ -54,12 +57,14 @@ const useRoom = ({ roomId, user }: UseRoomParams) => {
 				});
 			});
 			//Votes
-			socket.current.on("reveal_votes", () => {
+			socket.current.on("reveal_votes", ({ votesAverage }) => {
 				setShowVotes(true);
+				setVotesAverage(votesAverage);
 			});
 			socket.current.on("reset_votes", () => {
 				setShowVotes(false);
 				setVotes([]);
+				setVotesAverage(0);
 			});
 			socket.current.on("user_voted", (vote: Vote) => {
 				setVotes((currentVotes) => {
@@ -114,10 +119,6 @@ const useRoom = ({ roomId, user }: UseRoomParams) => {
 		socket.current?.emit(event, data);
 	};
 
-	const createRoom = () => {
-		socket.current?.emit("create_room");
-	};
-
 	return {
 		users,
 		votes,
@@ -128,6 +129,7 @@ const useRoom = ({ roomId, user }: UseRoomParams) => {
 		revealVotes,
 		resetVotes,
 		connected,
+		votesAverage,
 	};
 };
 

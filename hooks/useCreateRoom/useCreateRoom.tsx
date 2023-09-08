@@ -15,6 +15,7 @@ const useCreateRoom = ({
 }: Props) => {
 	const socket = useRef<Socket | null>(null);
 	const [connected, setConnected] = useState(false);
+	const [creatingRoom, setCreatingRoom] = useState(false);
 
 	useEffect(() => {
 		socket.current = io(SOCKET_CONFIGS.url, SOCKET_CONFIGS.options);
@@ -37,9 +38,10 @@ const useCreateRoom = ({
 
 	const creteRoom = () => {
 		socket.current?.emit("create_room");
+		setCreatingRoom(true);
 	};
 
-	return { creteRoom, connected };
+	return { creteRoom, connected, creatingRoom };
 };
 
 export default useCreateRoom;

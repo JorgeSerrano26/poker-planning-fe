@@ -23,7 +23,8 @@ export type JoinedData = {
 	users: User[];
 	cards: Card[];
 	votes: Vote[];
-	showCards: boolean;
+	showVotes: boolean;
+	votesAverage: number;
 };
 
 export type Card = Pick<CardProps, "value" | "label" | "id">;

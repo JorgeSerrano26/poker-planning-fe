@@ -2,11 +2,9 @@
 
 import GlitchText from "@/components/GlitchText/GlitchText";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { Socket, io } from "socket.io-client";
-import { Button, Divider, Input, Link } from "@nextui-org/react";
+import { useEffect, useState } from "react";
+import { Button, Divider, Input } from "@nextui-org/react";
 import { Toaster, toast } from "sonner";
-import useRoom from "@/hooks/useRoom/useRoom";
 import useCreateRoom from "@/hooks/useCreateRoom/useCreateRoom";
 import API from "@/app/services/API";
 
@@ -17,7 +15,7 @@ type Props = {
 export default function CrearRoomOrJoin({ error }: Props) {
 	const router = useRouter();
 	const [roomId, setRoomId] = useState<string>("");
-	const { creteRoom, connected } = useCreateRoom({
+	const { creteRoom, connected, creatingRoom } = useCreateRoom({
 		onRoomCreated: (roomId) => {
 			router.replace(`/room/${roomId}`);
 		},
@@ -66,11 +64,17 @@ export default function CrearRoomOrJoin({ error }: Props) {
 						disabled={!roomId.length}
 						variant="solid"
 					>
-						Unirse a la sala
+						Join to room
 					</Button>
 					<Divider className="my-4 bg-blue-700" />
-					<Button color="primary" onClick={creteRoom} disabled={!connected}>
-						Crear sala
+					<Button
+						color="primary"
+						onClick={creteRoom}
+						disabled={!connected}
+						isLoading={creatingRoom}
+						aria-label="Create room"
+					>
+						Create room
 					</Button>
 				</div>
 			</section>
